@@ -145,7 +145,7 @@ class AmazonStore internal constructor() : Storez {
         }
 
         override fun getState(): LiveData<Clientz.ConnectionStatus> {
-            Logger.v(TAG, "isBillingClientReady")
+            Logger.v(TAG, "isBillingClientReady: ${client.isReady()}")
             return client.connectionState
         }
 
