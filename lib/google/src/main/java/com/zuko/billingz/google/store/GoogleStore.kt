@@ -172,15 +172,14 @@ class GoogleStore internal constructor() : Storez {
                     options = options
                 )
             } ?: run {
-                sales.currentOrder.postValue(
-                    GoogleOrder(
-                        purchase = null,
-                        billingResult = BillingResult.newBuilder()
-                            .setDebugMessage("Product: $productId not found.")
-                            .setResponseCode(BillingClient.BillingResponseCode.ITEM_UNAVAILABLE)
-                            .build()
-                    )
+                val order = GoogleOrder(
+                    purchase = null,
+                    billingResult = BillingResult.newBuilder()
+                        .setDebugMessage("Product: $productId not found.")
+                        .setResponseCode(BillingClient.BillingResponseCode.ITEM_UNAVAILABLE)
+                        .build()
                 )
+                sales.failedOrder(order)
             }
             return sales.currentOrder
         }

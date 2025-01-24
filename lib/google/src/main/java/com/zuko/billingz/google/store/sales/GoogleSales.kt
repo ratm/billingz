@@ -118,6 +118,16 @@ class GoogleSales(
     private var activeSubscriptions = ArrayMap<String, GoogleReceipt>()
     private var activeInAppProducts = ArrayMap<String, GoogleReceipt>()
 
+    /**
+     * Checks if a purchase flow is active by comparing the newly selected product to the
+     * current order and then checks the state of the current order.
+     */
+    private fun isPurchaseFlowActive(): Boolean {
+        return currentOrder.value?.state != Orderz.State.COMPLETE &&
+                currentOrder.value?.state != Orderz.State.FAILED &&
+                currentOrder.value?.state != Orderz.State.CANCELED
+    }
+
     override fun setObfuscatedIdentifiers(accountId: String?, profileId: String?) {
         Logger.d(
             TAG,
@@ -145,6 +155,17 @@ class GoogleSales(
                 "\n options: $options"
         )
 
+        if (isPurchaseFlowActive()) {
+            // This function prevents multiple instances of the billing flow from launching
+            Logger.w(TAG, "A purchase flow has already started.")
+            return
+        }
+
+        val newOrder = GoogleOrder(null, null)
+        product.getProductId()?.let { productId ->
+            newOrder.skus = listOf(productId)
+        }
+        currentOrder.postValue(newOrder)
         if (product is GoogleProduct && client is GoogleClient) {
             val result = if (product.type == Productz.Type.SUBSCRIPTION) {
                 startSubscriptionPurchaseFlow(
@@ -247,6 +268,7 @@ class GoogleSales(
     override fun cancelOrder(order: Orderz) {
         Logger.v(TAG, "externally canceled order: ${order.orderId}")
         order.state = Orderz.State.CANCELED
+        order.skus = currentOrder.value?.skus
         orderUpdaterListener?.onFailure(order)
         currentOrder.postValue(order)
     }
@@ -254,6 +276,7 @@ class GoogleSales(
     override fun failedOrder(order: Orderz) {
         Logger.e(TAG, "internally failed order: ${order.orderId}")
         order.state = Orderz.State.FAILED
+        order.skus = currentOrder.value?.skus
         orderUpdaterListener?.onFailure(order)
         currentOrder.postValue(order)
     }
@@ -444,14 +467,18 @@ class GoogleSales(
      */
     internal fun processUpdatedPurchases(
         billingResult: BillingResult?,
-        purchases: MutableList<Purchase>?
+        purchases: List<Purchase>?
     ) {
         Logger.v(TAG, "processUpdatedPurchases=> purchase list size: ${purchases?.size ?: 0}")
         GoogleResponse.logResult(billingResult)
 
         if (purchases.isNullOrEmpty()) {
+            // This occurs when a user opens the billing flow UI and then closes it and chooses to not
+            // continue with the purchase.
             isQueriedOrders = false
             Logger.d(TAG, "No purchases available to resolve from queryPurchasesAsync")
+            val order = GoogleOrder(null, billingResult)
+            cancelOrder(order)
         } else {
             mainScope.launch(dispatcher.io()) {
                 for (p in purchases) {

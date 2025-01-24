@@ -167,7 +167,7 @@ class AmazonStore internal constructor() : Storez {
                     null,
                     null
                 )
-                sales.currentOrder.postValue(order)
+                sales.failedOrder(order)
             } else {
                 sales.startOrder(activity, product, client)
             }
