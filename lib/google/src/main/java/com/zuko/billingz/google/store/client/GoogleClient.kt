@@ -82,7 +82,7 @@ class GoogleClient(private val purchasesUpdatedListener: PurchasesUpdatedListene
                     .setListener(purchasesUpdatedListener)
                     .enablePendingPurchases(
                         PendingPurchasesParams.newBuilder()
-                            // .enablePrepaidPlans()
+                            .enablePrepaidPlans()
                             .enableOneTimeProducts()
                             .build()
                     ) // switch
