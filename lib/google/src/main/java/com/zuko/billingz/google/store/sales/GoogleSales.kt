@@ -179,6 +179,7 @@ class GoogleSales(
 
     // step 2a
     override fun validateOrder(order: Orderz) {
+        Logger.v(TAG, "validateOrder: ${order.orderId}")
         order.state = Orderz.State.VALIDATING
         val validatorCallback: Salez.ValidatorCallback = object : Salez.ValidatorCallback {
             override fun validated(order: Orderz) {
@@ -194,7 +195,7 @@ class GoogleSales(
 
     // step 2b
     override fun processOrder(order: Orderz) {
-        Logger.v(TAG, "processOrder")
+        Logger.v(TAG, "processOrder: ${order.orderId}")
         order.state = Orderz.State.PROCESSING
         if (order is GoogleOrder) {
             mainScope.launch {
@@ -207,7 +208,7 @@ class GoogleSales(
 
     // step 3
     override fun completeOrder(order: Orderz) {
-        Logger.v(TAG, "completeOrder")
+        Logger.v(TAG, "completeOrder: ${order.orderId}")
 
         if (order is GoogleOrder) {
             if (!order.skus.isNullOrEmpty()) {
@@ -244,14 +245,14 @@ class GoogleSales(
     }
 
     override fun cancelOrder(order: Orderz) {
-        Logger.v(TAG, "externally canceled order: $order")
+        Logger.v(TAG, "externally canceled order: ${order.orderId}")
         order.state = Orderz.State.CANCELED
         orderUpdaterListener?.onFailure(order)
         currentOrder.postValue(order)
     }
 
     override fun failedOrder(order: Orderz) {
-        Logger.e(TAG, "internally failed order: $order")
+        Logger.e(TAG, "internally failed order: ${order.orderId}")
         order.state = Orderz.State.FAILED
         orderUpdaterListener?.onFailure(order)
         currentOrder.postValue(order)
