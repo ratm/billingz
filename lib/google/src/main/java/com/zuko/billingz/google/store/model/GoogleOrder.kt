@@ -35,7 +35,6 @@ import com.zuko.billingz.core.store.model.Productz
 data class GoogleOrder(
     val purchase: Purchase?,
     val billingResult: BillingResult?
-
 ) : Orderz {
     /**
      * An Order ID is a string that represents a financial transaction
@@ -69,10 +68,6 @@ data class GoogleOrder(
      * Upgrades, downgrades, replacements, and re-sign-ups all create new purchase tokens and Order IDs.
      */
     override var entitlement: String? = purchase?.purchaseToken
-
-    // TODO: verify usage
-    var products: Map<String, Productz.Type> = ArrayMap()
-
     override var skus: List<String>? = purchase?.skus
     override val signature: String? = purchase?.signature
 
