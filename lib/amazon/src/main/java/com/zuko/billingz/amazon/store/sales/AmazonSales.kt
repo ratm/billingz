@@ -30,6 +30,7 @@ import com.amazon.device.iap.model.PurchaseResponse
 import com.amazon.device.iap.model.PurchaseUpdatesResponse
 import com.amazon.device.iap.model.Receipt
 import com.amazon.device.iap.model.RequestId
+import com.zuko.billingz.amazon.BuildConfig
 import com.zuko.billingz.amazon.store.inventory.AmazonInventoryz
 import com.zuko.billingz.amazon.store.model.AmazonOrder
 import com.zuko.billingz.amazon.store.model.AmazonOrderHistory
@@ -175,6 +176,7 @@ class AmazonSales(
             receipt = response.receipt,
             json = response.toJSON()
         )
+        order.orderId = currentOrderId?.toString()
         Logger.d(TAG, "processPurchase: $order")
         when (response.requestStatus) {
             PurchaseResponse.RequestStatus.SUCCESSFUL -> {
@@ -282,11 +284,21 @@ class AmazonSales(
                 order.receipt?.receiptId?.let { id ->
                     notifyFulfillment(id, true)
                 }
-                when (order.product?.type) {
-                    Productz.Type.CONSUMABLE -> completeConsumable(order.receipt)
-                    Productz.Type.NON_CONSUMABLE -> completeNonConsumable(order.receipt)
-                    Productz.Type.SUBSCRIPTION -> completeSubscription(order.receipt)
-                    else -> {}
+
+                when (order.receipt?.productType) {
+                    ProductType.CONSUMABLE -> completeConsumable(order.receipt)
+                    ProductType.ENTITLED -> completeNonConsumable(order.receipt)
+                    ProductType.SUBSCRIPTION -> completeSubscription(order.receipt)
+                    else -> {
+                        if (BuildConfig.DEBUG) {
+                            throw Exception("Can't complete order for unhandled ProductType: ${order.receipt}")
+                        } else {
+                            Logger.wtf(
+                                TAG,
+                                "Can't complete order for unhandled ProductType: ${order.receipt}"
+                            )
+                        }
+                    }
                 }
 
                 order.state = Orderz.State.COMPLETE
