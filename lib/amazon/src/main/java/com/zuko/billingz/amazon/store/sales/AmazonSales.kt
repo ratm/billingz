@@ -92,7 +92,7 @@ class AmazonSales(
 
         override fun invalidated(order: Orderz) {
             Logger.d(TAG, "invalidated order: ${order.orderId}")
-            cancelOrder(order)
+            failedOrder(order)
         }
     }
 
@@ -579,7 +579,7 @@ class AmazonSales(
             }
         }
         order.state = Orderz.State.CANCELED
-        orderUpdaterListener?.onFailure(order)
+        orderUpdaterListener?.onCanceled(order)
         currentOrder.postValue(order)
     }
 

@@ -208,7 +208,7 @@ class GoogleSales(
             }
 
             override fun invalidated(order: Orderz) {
-                cancelOrder(order)
+                failedOrder(order)
             }
         }
         orderValidatorListener?.validate(order, validatorCallback) ?: Logger.e(TAG, "Null validator object. Cannot complete order.")
@@ -269,7 +269,7 @@ class GoogleSales(
         Logger.v(TAG, "externally canceled order: ${order.orderId}")
         order.state = Orderz.State.CANCELED
         order.skus = currentOrder.value?.skus
-        orderUpdaterListener?.onFailure(order)
+        orderUpdaterListener?.onCanceled(order)
         currentOrder.postValue(order)
     }
 
