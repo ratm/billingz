@@ -477,8 +477,10 @@ class GoogleSales(
             // continue with the purchase, or when this class calls [refreshQueries].
             isQueriedOrders = false
             Logger.d(TAG, "No purchases available to resolve from queryPurchasesAsync")
-            val order = GoogleOrder(null, billingResult)
-            cancelOrder(order)
+            if (billingResult?.responseCode == BillingClient.BillingResponseCode.USER_CANCELED) {
+                val order = GoogleOrder(null, billingResult)
+                cancelOrder(order)
+            }
         } else {
             mainScope.launch(dispatcher.io()) {
                 for (p in purchases) {
