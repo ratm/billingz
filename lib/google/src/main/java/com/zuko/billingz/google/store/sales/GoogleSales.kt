@@ -473,8 +473,8 @@ class GoogleSales(
         GoogleResponse.logResult(billingResult)
 
         if (purchases.isNullOrEmpty()) {
-            // This occurs when a user opens the billing flow UI and then closes it and chooses to not
-            // continue with the purchase.
+            // This either occurs when a user opens the billing flow UI and then closes it and chooses to not
+            // continue with the purchase, or when this class calls [refreshQueries].
             isQueriedOrders = false
             Logger.d(TAG, "No purchases available to resolve from queryPurchasesAsync")
             val order = GoogleOrder(null, billingResult)
