@@ -301,6 +301,11 @@ class AmazonSales(
                     }
                 }
 
+                if (order.receipt?.productType == null) {
+                    failedOrder(order)
+                    return
+                }
+
                 order.state = Orderz.State.COMPLETE
                 currentOrder.postValue(order)
                 // update history
