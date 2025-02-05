@@ -118,15 +118,6 @@ class GoogleSales(
     private var activeSubscriptions = ArrayMap<String, GoogleReceipt>()
     private var activeInAppProducts = ArrayMap<String, GoogleReceipt>()
 
-    /**
-     * Checks if a purchase flow is active by comparing the newly selected product to the
-     * current order and then checks the state of the current order.
-     */
-    private fun isPurchaseFlowActive(): Boolean {
-        return currentOrder.value?.state != Orderz.State.COMPLETE &&
-                currentOrder.value?.state != Orderz.State.FAILED &&
-                currentOrder.value?.state != Orderz.State.CANCELED
-    }
 
     override fun setObfuscatedIdentifiers(accountId: String?, profileId: String?) {
         Logger.d(
@@ -154,12 +145,6 @@ class GoogleSales(
                 "\n product: $product," +
                 "\n options: $options"
         )
-
-        if (isPurchaseFlowActive()) {
-            // This function prevents multiple instances of the billing flow from launching
-            Logger.w(TAG, "A purchase flow has already started.")
-            return
-        }
 
         val newOrder = GoogleOrder(null, null)
         product.getProductId()?.let { productId ->
