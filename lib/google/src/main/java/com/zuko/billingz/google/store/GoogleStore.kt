@@ -172,15 +172,14 @@ class GoogleStore internal constructor() : Storez {
                     options = options
                 )
             } ?: run {
-                sales.currentOrder.postValue(
-                    GoogleOrder(
-                        purchase = null,
-                        billingResult = BillingResult.newBuilder()
-                            .setDebugMessage("Product: $productId not found.")
-                            .setResponseCode(BillingClient.BillingResponseCode.ITEM_UNAVAILABLE)
-                            .build()
-                    )
+                val order = GoogleOrder(
+                    purchase = null,
+                    billingResult = BillingResult.newBuilder()
+                        .setDebugMessage("Product: $productId not found.")
+                        .setResponseCode(BillingClient.BillingResponseCode.ITEM_UNAVAILABLE)
+                        .build()
                 )
+                sales.failedOrder(order)
             }
             return sales.currentOrder
         }
@@ -245,6 +244,7 @@ class GoogleStore internal constructor() : Storez {
         private var obfuscatedProfileId: String? = null
         private var hashingSalt: String? = null
         private var isNewVersion = false
+        private var isDebug = false
 
         override fun setOrderUpdater(listener: Salez.OrderUpdaterListener): Builder {
             updaterListener = listener
@@ -280,7 +280,17 @@ class GoogleStore internal constructor() : Storez {
             return this
         }
 
+        override fun enableDebugLogs(enable: Boolean): Storez.Builder {
+            isDebug = enable
+            return this
+        }
+
         override fun build(context: Context?): Storez {
+            Logger.verbosity = if (isDebug) {
+                Logger.Level.DEBUG
+            } else {
+                Logger.Level.DEFAULT
+            }
             instance = GoogleStore()
             instance.sales.apply {
                 orderUpdaterListener = updaterListener

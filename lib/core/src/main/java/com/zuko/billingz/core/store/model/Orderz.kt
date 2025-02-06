@@ -76,7 +76,7 @@ interface Orderz : ModuleIdentifier {
      * List of all products associated with this order id.
      * Minimum size of 1 - Subscriptions are always 1.
      */
-    val skus: List<String>?
+    var skus: List<String>?
 
     val signature: String?
 

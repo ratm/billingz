@@ -145,7 +145,7 @@ class AmazonStore internal constructor() : Storez {
         }
 
         override fun getState(): LiveData<Clientz.ConnectionStatus> {
-            Logger.v(TAG, "isBillingClientReady")
+            Logger.v(TAG, "isBillingClientReady: ${client.isReady()}")
             return client.connectionState
         }
 
@@ -167,7 +167,7 @@ class AmazonStore internal constructor() : Storez {
                     null,
                     null
                 )
-                sales.currentOrder.postValue(order)
+                sales.failedOrder(order)
             } else {
                 sales.startOrder(activity, product, client)
             }
@@ -190,6 +190,12 @@ class AmazonStore internal constructor() : Storez {
         }
 
         override fun queryProduct(sku: String, type: Productz.Type): QueryResult<Productz> {
+            Logger.v(
+                TAG,
+                "queryProduct =>" +
+                    "\n sku: $sku," +
+                    "\n type: $type"
+            )
             return inventory.queryProduct(sku, type)
         }
 
@@ -198,7 +204,12 @@ class AmazonStore internal constructor() : Storez {
             type: Productz.Type?,
             promo: Productz.Promotion?
         ): Map<String, Productz> {
-            Logger.v(TAG, "getProducts: $type : $promo")
+            Logger.v(
+                TAG,
+                "getProducts =>" +
+                    "\n type: $type," +
+                    "\n promo: $promo"
+            )
             return inventory.getProducts(
                 type = type,
                 promo = promo
@@ -237,6 +248,7 @@ class AmazonStore internal constructor() : Storez {
         private var profileId: String? = null
         private var hashingSalt: String? = null
         private var isNewVersion = false
+        private var isDebug = false
 
         /**
          * @param listener - Required to be set for proper functionality
@@ -277,7 +289,17 @@ class AmazonStore internal constructor() : Storez {
             return this
         }
 
+        override fun enableDebugLogs(enable: Boolean): Storez.Builder {
+            isDebug = enable
+            return this
+        }
+
         override fun build(context: Context?): Storez {
+            Logger.verbosity = if (isDebug) {
+                Logger.Level.DEBUG
+            } else {
+                Logger.Level.DEFAULT
+            }
             instance = AmazonStore()
             instance.sales.apply {
                 orderUpdaterListener = updaterListener

@@ -153,11 +153,19 @@ interface Salez : CleanUpz {
      */
     interface OrderUpdaterListener {
         /**
-         *
+         * Returns a successful order.
          */
         fun onComplete(receipt: Receiptz)
 
+        /**
+         * Returns a failed order.
+         */
         fun onFailure(order: Orderz)
+
+        /**
+         * Returns a canceled order.
+         */
+        fun onCanceled(order: Orderz)
     }
 
     /**

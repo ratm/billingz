@@ -42,15 +42,13 @@ data class AmazonOrder(
     val json: JSONObject?
 ) : Orderz {
 
-    var product: Productz? = null
-
     override var orderId: String? = receipt?.receiptId
     override var orderTime: Long = receipt?.purchaseDate?.time ?: 0L
     override var entitlement: String? = null
     override var skus: List<String>? = receipt?.sku?.let { listOf(receipt.sku) }
     override val signature: String? = null
     override var state: Orderz.State = Orderz.State.UNKNOWN
-    override var isCancelled: Boolean = receipt?.isCanceled ?: false
+    override var isCancelled: Boolean = receipt?.isCanceled == true
     override var quantity: Int = 1
     override var originalJson: String? = json.toString()
 

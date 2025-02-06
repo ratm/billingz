@@ -18,24 +18,20 @@
  */
 package com.zuko.billingz.google.store.model
 
-import androidx.collection.ArrayMap
 import com.android.billingclient.api.BillingResult
 import com.android.billingclient.api.Purchase
 import com.zuko.billingz.core.store.model.Orderz
-import com.zuko.billingz.core.store.model.Productz
 
 /**
  * Represents an Order.
  * @property billingResult
  * @property purchase
- * @property msg - shorthand for message.
  *
  *
  */
 data class GoogleOrder(
     val purchase: Purchase?,
     val billingResult: BillingResult?
-
 ) : Orderz {
     /**
      * An Order ID is a string that represents a financial transaction
@@ -69,11 +65,7 @@ data class GoogleOrder(
      * Upgrades, downgrades, replacements, and re-sign-ups all create new purchase tokens and Order IDs.
      */
     override var entitlement: String? = purchase?.purchaseToken
-
-    // TODO: verify usage
-    var products: Map<String, Productz.Type> = ArrayMap()
-
-    override var skus: List<String>? = purchase?.skus
+    override var skus: List<String>? = purchase?.products
     override val signature: String? = purchase?.signature
 
     override fun isGoogle(): Boolean {
